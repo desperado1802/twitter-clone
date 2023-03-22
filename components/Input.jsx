@@ -11,13 +11,21 @@ import {
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { useSession, signOut } from "next-auth/react";
 import { useRef, useState } from "react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 
 export default function Input() {
   const { data: session } = useSession();
   const [input, setInput] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const filePickerRef = useRef("");
+  const filePickerRef = useRef(null);
+  const [pickerVisibility, setPickerVisibility] = useState(false);
+
+  const addEmoji = (e) => {
+    const emoji = e.native;
+    setInput(input + emoji);
+  };
 
   const sendPost = async () => {
     if (loading) return;
@@ -45,6 +53,7 @@ export default function Input() {
     setInput("");
     setSelectedFile(null);
     setLoading(false);
+    setPickerVisibility(false);
   };
 
   const addImageToPost = (e) => {
@@ -93,7 +102,7 @@ export default function Input() {
             )}
             {!loading && (
               <div className="flex items-center justify-between pt-2.5">
-                <div className="flex">
+                <div className="flex relative">
                   <div
                     className=""
                     onClick={() => filePickerRef.current.click()}
@@ -106,7 +115,28 @@ export default function Input() {
                       onChange={addImageToPost}
                     />
                   </div>
-                  <EmojiHappyIcon className="hoverEffect h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 " />
+                  <EmojiHappyIcon
+                    onClick={() => setPickerVisibility(!pickerVisibility)}
+                    className="hoverEffect h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 "
+                  />
+                  <div
+                    className={`${
+                      pickerVisibility ? "block" : "hidden"
+                    } absolute top-[100%]`}
+                  >
+                    <Picker
+                      set="twitter"
+                      // data={data}
+                      emojiSize={22}
+                      emojiButtonSize={28}
+                      onEmojiSelect={addEmoji}
+                      onClickOutside={() => {
+                        if (pickerVisibility) {
+                          setPickerVisibility(false);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={sendPost}
