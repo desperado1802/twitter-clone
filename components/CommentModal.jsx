@@ -23,8 +23,8 @@ export default function CommentModal() {
   const { data: session } = useSession();
 
   const addEmoji = (e) => {
-    // const emoji = e.native;
-    // setInput(input + emoji);
+    const emoji = e.native;
+    setInput(input + emoji);
   };
 
   const sendComment = () => {};
