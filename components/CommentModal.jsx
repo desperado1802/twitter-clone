@@ -8,10 +8,18 @@ import {
   XIcon,
 } from "@heroicons/react/outline";
 import { db } from "@/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
 import Moment from "react-moment";
 import { useSession } from "next-auth/react";
 import Picker from "@emoji-mart/react";
+import { useRouter } from "next/router";
 
 export default function CommentModal() {
   const [open, setOpen] = useRecoilState(modalState);
@@ -19,6 +27,7 @@ export default function CommentModal() {
   const [post, setPost] = useState({});
   const [input, setInput] = useState("");
   const [pickerVisibility, setPickerVisibility] = useState(false);
+  const router = useRouter();
 
   const { data: session } = useSession();
 
@@ -27,7 +36,20 @@ export default function CommentModal() {
     setInput(input + emoji);
   };
 
-  const sendComment = () => {};
+  const sendComment = async () => {
+    await addDoc(collection(db, "posts", postId, "comments"), {
+      comment: input,
+      name: session.user.name,
+      username: session.user.username,
+      userImg: session.user.image,
+      timestamp: serverTimestamp(),
+      uid: session.user.uid,
+    });
+
+    setInput("");
+    setOpen(false);
+    router.push(`posts/${postId}`);
+  };
 
   useEffect(() => {
     onSnapshot(doc(db, "posts", postId), (snapshot) => {

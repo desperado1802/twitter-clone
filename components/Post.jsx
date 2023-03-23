@@ -25,6 +25,7 @@ import { modalState, postIdState } from "@/atom/modalAtom";
 export default function Post({ post }) {
   const { data: session } = useSession();
   const [likes, setLikes] = useState([]);
+  const [comments, setComments] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
   const [open, setOpen] = useRecoilState(modalState);
   const [postId, setPostId] = useRecoilState(postIdState);
@@ -36,6 +37,12 @@ export default function Post({ post }) {
         setLikes(snapshot.docs);
       }
     );
+  }, [db]);
+
+  useEffect(() => {
+    onSnapshot(collection(db, "posts", post.id, "comments"), (snapshot) => {
+      setComments(snapshot.docs);
+    });
   }, [db]);
 
   useEffect(() => {
@@ -76,7 +83,7 @@ export default function Post({ post }) {
       />
 
       {/* Right side */}
-      <div>
+      <div className="flex-1">
         {/* Header */}
 
         <div className="flex justify-between items-center">
@@ -109,17 +116,20 @@ export default function Post({ post }) {
         {/* Icons */}
 
         <div className="flex justify-between text-gray-500 p-2">
-          <ChatIcon
-            onClick={() => {
-              if (!session) {
-                signIn();
-              } else {
-                setPostId(post.id);
-                setOpen(!open);
-              }
-            }}
-            className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
-          />
+          <div className="flex items-center">
+            <ChatIcon
+              onClick={() => {
+                if (!session) {
+                  signIn();
+                } else {
+                  setPostId(post.id);
+                  setOpen(!open);
+                }
+              }}
+              className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
+            />
+            {comments.length > 0 && <span>{comments.length}</span>}
+          </div>
           {session?.user.uid === post?.data().id && (
             <TrashIcon
               onClick={deletePost}
