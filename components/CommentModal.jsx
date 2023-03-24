@@ -43,12 +43,11 @@ export default function CommentModal() {
       username: session.user.username,
       userImg: session.user.image,
       timestamp: serverTimestamp(),
-      uid: session.user.uid,
     });
 
     setInput("");
     setOpen(false);
-    router.push(`posts/${postId}`);
+    router.push(`/posts/${postId}`);
   };
 
   useEffect(() => {
